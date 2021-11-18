@@ -12,10 +12,10 @@ public enum PageType {
 public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
 {
     #region 成员变量
-    private ScrollRect rect;
+    protected ScrollRect rect;
     private RectTransform content;
-    private int pagesCount;
-    private float[] pages;
+    protected int pagesCount;
+    protected float[] pages;
 
     private bool isMoving = true;
     private float moveTime = 0.3f;
@@ -31,13 +31,13 @@ public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
     #endregion
 
     #region unity回调
-    void Start()
+    protected virtual void Start()
     {
         Initi();
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
         MoveListener();
         AutoMoveListener();
