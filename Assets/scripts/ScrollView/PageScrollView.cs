@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+//滚动类型枚举类
+public enum PageType {
+    Horizontal,
+    Vertical
+}
 
 public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
 {
@@ -10,7 +15,7 @@ public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
     private ScrollRect rect;
     private RectTransform content;
     private int pagesCount;
-    public float[] pages;
+    private float[] pages;
 
     private bool isMoving = true;
     private float moveTime = 0.3f;
@@ -22,8 +27,9 @@ public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
     private float autoTimer = 0;
     private float autoScrollTime = 2f;
     private bool isDruging;
+    public PageType pageType = PageType.Horizontal;
     #endregion
-    // Start is called before the first frame update
+
     #region unity回调
     void Start()
     {
@@ -66,7 +72,16 @@ public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
         pages = new float[pagesCount];
         for (int i = 0; i < pages.Length; i++)
         {
-            pages[i] = (i * (1.0f / ((float)pagesCount - 1.0f)));
+            switch (pageType)
+            {
+                case PageType.Horizontal:
+                    pages[i] = (i * (1.0f / ((float)pagesCount - 1.0f)));
+                    break;
+                case PageType.Vertical:
+                    pages[i] = 1-(i * (1.0f / ((float)pagesCount - 1.0f)));
+                    break;
+            }
+            
         }
     }
     //监听滚动
@@ -74,7 +89,16 @@ public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
         if (isMoving)
         {
             timer += Time.deltaTime * (1 / moveTime);
-            rect.horizontalNormalizedPosition = Mathf.Lerp(startPosition, pages[currentPage], timer);
+            switch (pageType)
+            {
+                case PageType.Horizontal:
+                    rect.horizontalNormalizedPosition = Mathf.Lerp(startPosition, pages[currentPage], timer);
+                    break;
+                case PageType.Vertical:
+                    rect.verticalNormalizedPosition = Mathf.Lerp(startPosition, pages[currentPage], timer);
+                    break;
+            }
+           
             if (timer >= 1)
             {
                 isMoving = false;
@@ -103,14 +127,30 @@ public class PageScrollView : MonoBehaviour, IEndDragHandler,IBeginDragHandler
         isMoving = true;
         currentPage = index;
         timer = 0;
-        startPosition = rect.horizontalNormalizedPosition;
+        switch (pageType)
+        {
+            case PageType.Horizontal:
+                startPosition = rect.horizontalNormalizedPosition;
+                break;
+            case PageType.Vertical:
+                startPosition = rect.verticalNormalizedPosition;
+                break;
+        }
     }
     //计算离的最近的页面
     private int CaculateMinPage() {
         int minPage = 0;
         for (int i = 0; i < pages.Length; i++)
         {
-            minPage = (Mathf.Abs(pages[i] - rect.horizontalNormalizedPosition) < Mathf.Abs(pages[minPage] - rect.horizontalNormalizedPosition)) ? i : minPage;
+            switch (pageType)
+            {
+                case PageType.Horizontal:
+                    minPage = (Mathf.Abs(pages[i] - rect.horizontalNormalizedPosition) < Mathf.Abs(pages[minPage] - rect.horizontalNormalizedPosition)) ? i : minPage;
+                    break;
+                case PageType.Vertical:
+                    minPage = (Mathf.Abs(pages[i] - rect.verticalNormalizedPosition) < Mathf.Abs(pages[minPage] - rect.verticalNormalizedPosition)) ? i : minPage;
+                    break;
+            }
         }
         return minPage;
     }
